@@ -34,8 +34,6 @@ class NodeConnection(threading.Thread):
            utf-8/ascii will be used to decode the packets ate the other node."""
         if isinstance(data, str):
             self.sock.sendall( data.encode(encoding_type) + self.EOT_CHAR )
-            response = self.sock.recv(3)
-            print(response)
 
         elif isinstance(data, dict):
             try:
@@ -58,6 +56,9 @@ class NodeConnection(threading.Thread):
         else:
             self.main_node.debug_print('datatype used is not valid plese use str, dict (will be send as json) or bytes')
 
+    def send_ACK(self):
+        self.sock.sendall("ACK".encode('utf-8'))
+
     def stop(self):
         """Terminates the connection and the thread is stopped."""
         self.terminate_flag.set()
@@ -76,6 +77,9 @@ class NodeConnection(threading.Thread):
 
         except UnicodeDecodeError:
             return packet
+
+    def ACK_received():
+        print("We received ACK message")
 
     # Required to implement the Thread. This is the main loop of the node client.
     def run(self):
@@ -96,7 +100,6 @@ class NodeConnection(threading.Thread):
                 self.main_node.debug_print('Unexpected error')
                 self.main_node.debug_print(e)
 
-            # BUG: possible buffer overflow when no EOT_CHAR is found => Fix by max buffer count or so?
             if chunk != b'':
                 buffer += chunk
                 eot_pos = buffer.find(self.EOT_CHAR)
@@ -106,7 +109,10 @@ class NodeConnection(threading.Thread):
                     buffer = buffer[eot_pos + 1:]
 
                     self.main_node.message_count_recv += 1
-                    self.main_node.node_message( self, self.parse_packet(packet))
+                    if(eot_pos == 3): ##The message is ACK
+                        ACK_received()
+                    else:
+                        self.main_node.node_message( self, self.parse_packet(packet))
 
                     eot_pos = buffer.find(self.EOT_CHAR)
 

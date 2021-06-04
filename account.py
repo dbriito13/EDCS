@@ -31,9 +31,10 @@ class Account (Node):
 
     def node_message(self, node, data):
         #node es el nodo que ha enviado el dinero, le respondemos con ACK
-        data = "ACK"
-        node.sock.sendall(data.encode('utf-8'))
         print("EL MENSAJE HA LLEGADO ")
+        self.balance += int(data)
+        print(self.balance)
+        node.send_ACK()
         
     def node_disconnect_with_outbound_node(self, node):
         print("node wants to disconnect with oher outbound node: " + node.id)
