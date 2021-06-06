@@ -16,7 +16,7 @@ class NodeConnection(threading.Thread):
         self.main_node = main_node
         self.sock = sock
         self.terminate_flag = threading.Event()
-
+ 
         # The id of the connected node
         self.id = id
 
@@ -29,9 +29,6 @@ class NodeConnection(threading.Thread):
         self.main_node.debug_print("NodeConnection.send: Started with client (" + self.id + ") '" + self.host + ":" + str(self.port) + "'")
 
     def send(self, data, encoding_type='utf-8'):
-        """Send the data to the connected node. The data can be pure text (str), dict object (send as json) and bytes object.
-           When sending bytes object, it will be using standard socket communication. A end of transmission character 0x04 
-           utf-8/ascii will be used to decode the packets ate the other node."""
         if isinstance(data, str):
             self.sock.sendall( data.encode(encoding_type) + self.EOT_CHAR )
 
@@ -64,8 +61,6 @@ class NodeConnection(threading.Thread):
         self.terminate_flag.set()
 
     def parse_packet(self, packet):
-        """Parse the packet and determines wheter it has been send in str, json or byte format. It returns
-           the according data."""
         try:
             packet_decoded = packet.decode('utf-8')
 
@@ -105,11 +100,10 @@ class NodeConnection(threading.Thread):
                 eot_pos = buffer.find(self.EOT_CHAR)
 
                 while eot_pos > 0:
-                    packet = buffer[:eot_pos]
+                    packet = buffer[:eo t_pos]
                     buffer = buffer[eot_pos + 1:]
 
-                    self.main_node.message_count_recv += 1
-                    if(eot_pos == 3): ##The message is ACK
+                    if(packet[0] == 'A'): ##The message is ACK
                         ACK_received()
                     else:
                         self.main_node.node_message( self, self.parse_packet(packet))
@@ -121,12 +115,6 @@ class NodeConnection(threading.Thread):
         self.sock.settimeout(None)
         self.sock.close()
         self.main_node.debug_print("NodeConnection: Stopped")
-
-    def set_info(self, key, value):
-        self.info[key] = value
-
-    def get_info(self, key):
-        return self.info[key]
 
     def __str__(self):
         return 'NodeConnection: {}:{} <-> {}:{} ({})'.format(self.main_node.host, self.main_node.port, self.host, self.port, self.id)

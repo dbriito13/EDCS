@@ -1,7 +1,7 @@
 import sys
 
 sys.path.insert(0, '..') 
-from p2pnetwork.account import Account
+from account import Account
 
 def create_Account(ip, port, name):
 	new_account = Account(ip, port, name)

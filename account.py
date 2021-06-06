@@ -12,6 +12,7 @@ class Account (Node):
     def __init__(self, host, port, name):
         super(Account, self).__init__(host, port, None)
         self.balance = 0.0
+        self.mutex = 0
         self.name = name
 
     # all the methods below are called when things happen in the network.

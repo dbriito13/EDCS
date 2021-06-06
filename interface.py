@@ -2,45 +2,54 @@ import tkinter as tk
 import socket
 import time
 from functionality import *
+from tkinter import messagebox
+
+def on_closing():
+    if messagebox.askokcancel("Quit", "Do you want to quit?"):
+        if current_Account:
+            current_Account.stop()
+        window.destroy()
 
 def buttonPressed():
-	print(entry1.get())
-	print(entry2.get()) 
-	print(entry3.get())
-	global current_Account;
-	current_Account = create_Account(entry1.get(), int(entry2.get()), entry3.get())
-	global IP;
-	global PORT;
-	global name;
-	IP = entry1.get()
-	PORT = entry2.get()
-	name = entry3.get()
-	current_Account.start()
+    print(entry1.get())
+    print(entry2.get()) 
+    print(entry3.get())
+    global current_Account;
+    current_Account = create_Account(entry1.get(), int(entry2.get()), entry3.get())
+    global IP;
+    global PORT;
+    global name;
+    IP = entry1.get()
+    PORT = entry2.get()
+    name = entry3.get()
+    current_Account.start()
 
-	time.sleep(2)
-	print(current_Account)
-	frame_login.pack_forget()
-	frame_functionality.pack()
-	label_ff.config(text = name + ", on" + IP + ":" + PORT)
-	return current_Account
+    time.sleep(2)
+    print(current_Account)
+    frame_login.pack_forget()
+    frame_functionality.pack()
+    label_ff.config(text = name + ", on" + IP + ":" + PORT)
+    return current_Account
 
 def ConnectAccountPressed():
-	print("pressed connect account button")
-	res = current_Account.connect_with_node(entry1_ff.get(), int(entry2_ff.get()))
-	print(res)
+    print("pressed connect account button")
+    res = current_Account.connect_with_node(entry1_ff.get(), int(entry2_ff.get()))
+    print(res)
 
 def sendMoneyPressed():
-	print("pressed send money")
-	res = current_Account.connect_with_node(entry1_M.get(), int(entry2_M.get()))
-	if(res == -1):
-		print("Can't connect to yourself!")
-		return
-	if(res == 0):
-		print("You are already connected to this node, starting transfer!...")
+    print("pressed send money")
+    res = current_Account.connect_with_node(entry1_M.get(), int(entry2_M.get()))
+    if(res == -1):
+        print("Can't connect to yourself!")
+        return
+    if(res == 0):
+        print("You are already connected to this node, starting transfer!...")
 
-	current_Account.send_to_node(entryM_M.get(), entry1_M.get(), int(entry2_M.get()))
+    current_Account.send_to_node(entryM_M.get(), entry1_M.get(), int(entry2_M.get()))
 
 window = tk.Tk()
+
+window.protocol("WM_DELETE_WINDOW", on_closing)
 
 frame_functionality = tk.Frame(window)
 label_ff = tk.Label(frame_functionality,text="Money Sending App")

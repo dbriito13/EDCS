@@ -9,7 +9,7 @@ from p2pnetwork.nodeconnection import NodeConnection
 
 class Node(threading.Thread):
 
-    def __init__(self, host, port, callback=None):
+    def __init__(self, host, port):
         super(Node, self).__init__()
 
         # When this flag is set, the node will stop and close
@@ -18,11 +18,6 @@ class Node(threading.Thread):
         # Server details, host (or ip) to bind to and the port
         self.host = host
         self.port = port
-
-        self.amount = 0.0
-
-        # Events are send back to the given callback
-        self.callback = callback
 
         # Nodes that have established a connection with this node
         self.nodes_inbound = []  # Nodes that are connect with us N->(US)->N
@@ -36,6 +31,8 @@ class Node(threading.Thread):
         t = self.host + str(self.port) + str(random.randint(1, 99999999))
         id.update(t.encode('ascii'))
         self.id = id.hexdigest()
+
+
 
         # Start the TCP/IP server
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -62,6 +59,7 @@ class Node(threading.Thread):
         self.sock.settimeout(10.0)
         self.sock.listen(1)
 
+'''
     def delete_closed_connections(self):
         for n in self.nodes_inbound:
             if n.terminate_flag.is_set():
@@ -74,6 +72,7 @@ class Node(threading.Thread):
                 self.outbound_node_disconnected(n)
                 n.join()
                 del self.nodes_outbound[self.nodes_inbound.index(n)]
+'''
 
     def send_to_node(self, data, host, port):
         for node in self.nodes_outbound:
@@ -111,6 +110,7 @@ class Node(threading.Thread):
         except Exception as e:
             self.debug_print("TcpServer.connect_with_node: Could not connect with node. (" + str(e) + ")")
 
+'''
     def disconnect_with_node(self, host, port):
         for node in self.nodes_outbound:
             if node.host == host and node.port == port:
@@ -120,6 +120,7 @@ class Node(threading.Thread):
 
         else:
             print("Node disconnect_with_node: cannot disconnect with a node with which we are not connected.")
+'''
 
     def stop(self):
         self.node_request_to_stop()
