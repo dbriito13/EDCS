@@ -11,9 +11,6 @@ def on_closing():
         window.destroy()
 
 def buttonPressed():
-    print(entry1.get())
-    print(entry2.get()) 
-    print(entry3.get())
     global current_Account;
     current_Account = Account(entry1.get(), int(entry2.get()), entry3.get())
     global IP;
@@ -25,7 +22,6 @@ def buttonPressed():
     current_Account.start()
 
     time.sleep(2)
-    print(current_Account)
     frame_login.pack_forget()
     frame_functionality.pack()
     label_ff.config(text = name + ", on " + IP + ":" + PORT)

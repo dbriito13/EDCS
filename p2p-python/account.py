@@ -19,6 +19,6 @@ class Account(Node):
         self.balance += amount
         self.lock.release()
         print("Lock released!")
-        print("Your resulting balance after the operation is: " + self.balance)
+        print("Your resulting balance after the operation is: " + str(self.balance))
         
     

@@ -95,9 +95,9 @@ class Node(threading.Thread):
                     message += data
 
                 #Now that we have the message received we will do sth with it
-                print("received message: " + message + "message length: " + str(len(message)))
+                print("received message: " + message + ", message length: " + str(len(message)))
                 #We receive the amount sent by another user and call the function add Money which will be implemented in the Account class
-                self.node_message(message)
+                self.node_message(str(message))
             except socket.timeout:
                 print('Node: Connection timeout!')
 

@@ -7,6 +7,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Node implements Runnable {
     private String host;
@@ -42,15 +43,19 @@ public class Node implements Runnable {
 
     @Override
     public void run() {
+        /**
+         * run: Loop that waits for incoming socket connections and deals with them accordingly
+         *
+         */
         while(terminate_flag == 0){
             System.out.println("Node: Waiting for incoming connections...");
             try {
                 Socket clientSocket = this.ServerSocket.accept();
-                DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream());
-                DataInputStream in = new DataInputStream(clientSocket.getInputStream());
+                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 //Now we receive the UTF-8 String sent by the client
-                String str = (String)in.readUTF();
+                String str = (String)in.readLine();
                 System.out.println("message= " + str);
+                this.addAmount(str);
 
             }catch (java.net.SocketTimeoutException e){
                 System.out.println("Socket timed out, restarting listening process...");
@@ -62,16 +67,20 @@ public class Node implements Runnable {
         }
     }
 
+    public void addAmount(String amount){
+        System.out.println("Placeholder method. Should be implemented in child class");
+    }
+
     public void send_message(String message, String host, int port){
         Socket ConnectionSocket;
         try {
             ConnectionSocket = new Socket(host,port);
             //After we are connected to the socket we will send the message
-            DataOutputStream dout = new DataOutputStream(ConnectionSocket.getOutputStream());
+            PrintWriter writer = new PrintWriter(ConnectionSocket.getOutputStream(), true);
             //We write the message we want to send in the Data Output stream
-            dout.writeUTF(message);
-            dout.flush();
-            dout.close();
+            writer.write(message);
+            writer.flush();
+            writer.close();
             System.out.println("Sent message:" + message + " to receiver at, IP:" + host + ", port: " + port);
             ConnectionSocket.close();
         } catch (IOException e) {

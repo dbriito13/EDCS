@@ -1,15 +1,19 @@
 import java.io.IOException;
 import java.nio.DoubleBuffer;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Account extends Node{
     private Double amount;
     private String name;
+    private ReentrantLock mutex;
 
     public Account(String host, int port, String name) throws IOException {
         super(host, port);
         //We will set the starting amount as 0
         this.amount = 0.0;
         this.name = name;
+        this.mutex = new ReentrantLock();
     }
 
     public int send_money(String account_ip, int account_port, Double amount){
@@ -28,14 +32,24 @@ public class Account extends Node{
         return 0;
     }
 
-    public void addAmount(Double amount){
-        if(amount < 0){
+    @Override
+    public void addAmount(String amount){
+        //Convert the amount to a Double value
+        Double amount_d = Double.parseDouble(amount);
+        if(amount_d < 0){
             System.out.println("Error! You can't add a negative sum of money into an account.");
             return;
         }
-        System.out.println("Adding " + amount.toString() + " € to your account!");
+        System.out.println("Adding " + amount_d.toString() + " € to your account!");
         //Here we will implement the mutex lock
-        this.amount += amount;
+        try{
+            this.mutex.lock();
+            //Here the update of the balance occurs
+            this.amount += amount_d;
+        } finally {
+            this.mutex.unlock();
+        }
+        this.amount += amount_d;
     }
 
     public void removeAmount(Double amount){
@@ -54,15 +68,16 @@ public class Account extends Node{
             return;
         }
         System.out.println("Initiating sample deposit of money into account...");
-        this.addAmount(amount);
+        this.addAmount(amount.toString());
     }
 
-    public static void main(String[] args) throws IOException {
-        Account account1 = new Account("127.0.0.1", 8080, "Daniel");
-        //Account account2 = new Account("127.0.0.1", 18080, "Lucas");
+    public static void main(String[] args) throws IOException, InterruptedException {
+        Account account1 = new Account("127.0.0.1", 19011, "Daniel");
+        //Account account2 = new Account("127.0.0.1", 18082, "Lucas");
 
         Thread t1 = new Thread(account1);
         t1.start();
+
 
         //Thread t2 = new Thread(account2);
         //t2.start();
@@ -70,7 +85,8 @@ public class Account extends Node{
         account1.depositAmount(200.0);
 
         //Sending of the messages between the accounts1
-        account1.send_money("127.0.0.1", 18000, 100.0);
+        //account1.send_money("127.0.0.1", 18082, 100.0);
+        TimeUnit.SECONDS.sleep(35);
 
         t1.interrupt();
         //t2.interrupt();
