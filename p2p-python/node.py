@@ -18,22 +18,35 @@ class Node(threading.Thread):
         self.port = port
 
         # Start the TCP/IP server
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.init_server()
+        self.sock = self.init_server()
 
-        # Debugging on or off!
-        self.debug = True
+        self.lock = threading.Lock()
 
         print("Node created correctly!")
 
     def init_server(self):
-        """Initialization of the TCP/IP server to receive connections. It binds to the given host and port."""
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.sock.bind((self.host, self.port))
-        self.sock.settimeout(10.0)
-        self.sock.listen(1)
+        """
+        Initializes the socket and sets its options, then returns the socket
+        """
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM);
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s.bind((self.host, self.port))
+        s.settimeout(10.0)
+        s.listen(1)
+        return s;
 
     def send_to_node(self, data, host, port):
+        '''
+        send_to_node connects to the host and port combination given and sends a message containing the data parameter
+
+        data: String of the data we want to transmit as message
+        host: IP address of the node we want to connect to
+        port: Listening port of the node we want to connect to
+        return: 0 if the execution and sending of the message went smoothly
+            errors: -1, if we are trying to send a message to ourselves
+                    -2, if there is an error with the socket connection
+
+        '''
         if host == self.host and port == self.port:
             return -1;
 
@@ -48,13 +61,25 @@ class Node(threading.Thread):
             print("Sent message to node!")
             sock.close()
 
+            #Space to receive ACK?
+
+            return 0;
+
         except Exception as e:
             print("TcpServer.connect_with_node: Could not connect with node. (" + str(e) + ")")
+            return -2;
 
     def stop(self):
+        '''
+        stops the node from listening to requests
+        '''
         self.terminate_flag.set()
 
     def run(self):
+        '''
+        run: Loop that listens for incoming requests, accepts them and reads the message they sent.
+             It later calls on the node_message function which takes care of higher level functionality
+        '''
         while not self.terminate_flag.is_set():  # Check whether the thread needs to be closed
             try:
                 print("Node: Wait for incoming connection")
@@ -69,13 +94,10 @@ class Node(threading.Thread):
                     data = data.decode('utf-8')
                     message += data
 
-                #Convert the message to a Double that we can add to the amount
-                amount = float(message)
-                print(amount)
-
-                # Now that we have the message received we will do sth with it
+                #Now that we have the message received we will do sth with it
                 print("received message: " + message + "message length: " + str(len(message)))
                 #We receive the amount sent by another user and call the function add Money which will be implemented in the Account class
+                self.node_message(message)
             except socket.timeout:
                 print('Node: Connection timeout!')
 

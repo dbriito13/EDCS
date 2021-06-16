@@ -1,9 +1,3 @@
-#######################################################################################################################
-# Author: Maurice Snoeren                                                                                             #
-# Version: 0.1 beta (use at your own risk)                                                                            #
-#                                                                                                                     #
-# MyOwnPeer2PeerNode is an example how to use the p2pnet.Node to implement your own peer-to-peer network node.        #
-#######################################################################################################################
 from node import Node
 
 class Account(Node):
@@ -13,29 +7,18 @@ class Account(Node):
         self.balance = 0.0
         self.name = name
 
-    # all the methods below are called when things happen in the network.
-    # implement your network node behavior to create the required functionality.
-
-    def outbound_node_connected(self, node):
-        print("outbound_node_connected: " + node.id)
-        
-    def inbound_node_connected(self, node):
-        print("inbound_node_connected: " + node.id)
-
-    def inbound_node_disconnected(self, node):
-        print("inbound_node_disconnected: " + node.id)
-
-    def outbound_node_disconnected(self, node):
-        print("outbound_node_disconnected: " + node.id)
-
     def node_message(self, data):
-        #node es el nodo que ha enviado el dinero, le respondemos con ACK
-        self.balance += int(data)
-        print(self.balance)
+        '''
+        node_message: This function is called when a node receives a text message,
+            in it we will raise a lock, and update the balance of the user's Account
+            data: String of the data received by the node.
+        '''
+        amount = float(data)
+        self.lock.acquire()
+        print("Lock acquired!")
+        self.balance += amount
+        self.lock.release()
+        print("Lock released!")
+        print("Your resulting balance after the operation is: " + self.balance)
         
-    def node_disconnect_with_outbound_node(self, node):
-        print("node wants to disconnect with oher outbound node: " + node.id)
-        
-    def node_request_to_stop(self):
-        print("node is requested to stop!")
     
