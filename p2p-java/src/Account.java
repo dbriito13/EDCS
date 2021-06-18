@@ -28,6 +28,12 @@ public class Account extends Node{
             return -1;
         }
         message = Double.toString(amount);
+        try{
+            this.mutex.lock();
+            this.amount = this.amount - amount;
+        }finally {
+            this.mutex.unlock();
+        }
         this.send_message(message, account_ip, account_port);
         return 0;
     }
@@ -49,7 +55,6 @@ public class Account extends Node{
         } finally {
             this.mutex.unlock();
         }
-        this.amount += amount_d;
     }
 
     public void removeAmount(Double amount){
@@ -59,7 +64,12 @@ public class Account extends Node{
         }
         System.out.println("Taking out " + amount.toString() + " € from your account!");
         //Here we will implement the mutex lock
-        this.amount = this.amount - amount;
+        try{
+            this.mutex.lock();
+            this.amount = this.amount - amount;
+        }finally {
+            this.mutex.unlock();
+        }
     }
 
     public void depositAmount(Double amount){
@@ -73,25 +83,25 @@ public class Account extends Node{
 
     public static void main(String[] args) throws IOException, InterruptedException {
         Account account1 = new Account("127.0.0.1", 19011, "Daniel");
-        //Account account2 = new Account("127.0.0.1", 18082, "Lucas");
+        Account account2 = new Account("127.0.0.1", 18082, "Lucas");
 
         Thread t1 = new Thread(account1);
         t1.start();
 
 
-        //Thread t2 = new Thread(account2);
-        //t2.start();
+        Thread t2 = new Thread(account2);
+        t2.start();
 
         account1.depositAmount(200.0);
 
         //Sending of the messages between the accounts1
-        //account1.send_money("127.0.0.1", 18082, 100.0);
+        account1.send_money("127.0.0.1", 18082, 100.0);
         TimeUnit.SECONDS.sleep(35);
 
         t1.interrupt();
-        //t2.interrupt();
+        t2.interrupt();
         account1.stop_node();
-        //account2.stop_node();
+        account2.stop_node();
 
     }
 }
