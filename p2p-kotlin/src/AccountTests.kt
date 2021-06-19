@@ -1,14 +1,14 @@
 import org.junit.Test
-import java.io.IOException
 import java.net.InetAddress
+import kotlin.concurrent.thread
 import kotlin.test.assertFailsWith
 
 class AccountTests {
     @Test
     fun testCreation(){
         //Tests the correct creation of Account
-        val nodeAddress = NodeAddress("127.0.0.1", 18080);
-        val username = "Daniel"
+        val nodeAddress = NodeAddress("127.0.0.1", 19800);
+        val username = "testUsername"
         //Creation of Account
         val account = Account(nodeAddress, username);
         //Check the account was correctly created and has a balance of 0.0€
@@ -16,6 +16,45 @@ class AccountTests {
         assert(account.balance == 0.0);
         assert(account.sock.inetAddress == InetAddress.getByName(nodeAddress.host))
         assert(account.sock.localPort == nodeAddress.port)
+    }
+
+    @Test
+    fun testNotEnoughFunds(){
+        val nodeAddress1 = NodeAddress("127.0.0.1", 18080);
+        val username1 = "Daniel"
+        //Creation of Account
+        val account1 = Account(nodeAddress1, username1);
+
+        val nodeAddress2 = NodeAddress("127.0.0.1", 19800);
+        val username2 = "Lucas"
+        //Creation of Account
+        val account2 = Account(nodeAddress2, username2);
+
+        //account1 has 0.0 so it shouldn't be able to perform any money transfer
+        assertFailsWith<NotEnoughFunds> { account2.transferMoney(nodeAddress1, 100.0); }
+    }
+
+    @Test
+    fun testSendNotDoubleAmount(){
+        val nodeAddress1 = NodeAddress("127.0.0.1", 18080);
+        val username1 = "Daniel"
+        //Creation of Account
+        val account1 = Account(nodeAddress1, username1);
+        assertFailsWith<NotParseableToDouble> {
+            account1.listenConnections();
+
+            val nodeAddress2 = NodeAddress("127.0.0.1", 19800);
+            //Creation of Account
+            val account2 = Node(nodeAddress2);
+
+            Thread.sleep(1000);
+
+            account2.sendMessage(nodeAddress1, "This String is clearly not a Double!")
+
+            Thread.sleep(1000)
+
+            account1.checkState()
+        }
     }
 
     @Test
@@ -35,10 +74,46 @@ class AccountTests {
 
         Thread.sleep(1000);
 
-        account2.transferMoney(nodeAddress1, 100.0);
+        thread(start = true) {
+            account2.transferMoney(nodeAddress1, 100.0);
+        }
+        Thread.sleep(35000);
+    }
+
+    @Test
+    fun testSendMoneyToUsername(){
+        val nodeAddress1 = NodeAddress("127.0.0.1", 18000);
+        val username1 = "dbrito"
+        //Creation of Account
+        val account1 = Account(nodeAddress1, username1);
+
+        val nodeAddress2 = NodeAddress("127.0.0.1", 19800);
+        val username2 = "Lucas"
+        //Creation of Account
+        val account2 = Account(nodeAddress2, username2);
+
+        account2.insertAmount(1000.0);
+        account1.listenConnections();
 
         Thread.sleep(1000);
-        assert(account1.checkBalance() == 100.0)
-        assert(account2.checkBalance() == 900.0)
+
+        account2.transferMoneyToUser(username1, 100.0);
+        Thread.sleep(7000);
+    }
+
+    @Test
+    fun testAccountRegisteredToDiscoveryServer(){
+        val nodeAddress = NodeAddress("127.0.0.1", 19880);
+        val username = "testSubject"
+        //Creation of Account
+        val account = Account(nodeAddress, username);
+        //Check the account was correctly created and has a balance of 0.0€
+        val requestHandler = Request()
+        val response = requestHandler.getRequest("testSubject");
+        val aux = response.split(":")
+        val ipReq = aux[0];
+        val portReq = aux[1];
+        assert(ipReq == nodeAddress.host);
+        assert(portReq.toInt() == nodeAddress.port)
     }
 }
