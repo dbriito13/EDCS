@@ -1,9 +1,12 @@
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.DoubleBuffer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Account extends Node{
+
     private Double amount;
     private String name;
     private ReentrantLock mutex;
@@ -16,15 +19,19 @@ public class Account extends Node{
         this.mutex = new ReentrantLock();
     }
 
+    public Double getAmount(){
+        return this.amount;
+    }
+
     public int send_money(String account_ip, int account_port, Double amount){
         String message;
-        //First we check that we have enough money to send this amount
         if(amount < 0.0){
             System.out.println("Error! You can't deposit a negative sum into an account.");
             return -1;
         }
         if(this.amount < amount){
             System.out.println("Money transfer to Account: " + account_ip + ":" + account_port + "failed!: Insufficient Funds!");
+            System.out.println("Your current amount is " + this.amount.toString());
             return -1;
         }
         message = Double.toString(amount);
@@ -55,6 +62,8 @@ public class Account extends Node{
         } finally {
             this.mutex.unlock();
         }
+
+        System.out.println("Your current amount is " + this.amount.toString());
     }
 
     public void removeAmount(Double amount){
@@ -70,6 +79,8 @@ public class Account extends Node{
         }finally {
             this.mutex.unlock();
         }
+
+        System.out.println("Your current amount is " + this.amount.toString());
     }
 
     public void depositAmount(Double amount){
@@ -79,6 +90,19 @@ public class Account extends Node{
         }
         System.out.println("Initiating sample deposit of money into account...");
         this.addAmount(amount.toString());
+    }
+
+    public static boolean confirmation(String s) throws UnknownHostException {
+        String prove = "";
+        String aux = InetAddress.getLocalHost() + "";
+        System.out.println(aux);
+        prove += aux.substring(aux.indexOf("/")+1);
+        if (s.equals(prove)){
+            System.out.println("Valid IP direction");
+            return true;
+        }
+        System.out.println("Invalid IP direction");
+        return false;
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
