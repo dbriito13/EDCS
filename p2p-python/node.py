@@ -1,9 +1,6 @@
 import socket
-import sys
 import time
 import threading
-import random
-import hashlib
 
 class Node(threading.Thread):
 
@@ -51,17 +48,15 @@ class Node(threading.Thread):
             return -1;
 
         try:
-            #Create socket and bind it to our host and port
+            # Create socket and bind it to our host and port
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM);
             print("connecting to %s port %s" % (host, port))
             sock.connect((host,port))
 
-            #Now we send the data through the created socket
+            # Now we send the data through the created socket
             sock.sendall(data.encode('utf-8'))
             print("Sent message to node!")
             sock.close()
-
-            #Space to receive ACK?
 
             return 0;
 
@@ -94,9 +89,9 @@ class Node(threading.Thread):
                     data = data.decode('utf-8')
                     message += data
 
-                #Now that we have the message received we will do sth with it
+                # Now that we have the message received we will do something with it
                 print("received message: " + message + ", message length: " + str(len(message)))
-                #We receive the amount sent by another user and call the function add Money which will be implemented in the Account class
+                # We receive the amount sent by another user and call the function node_message which is implemented in the Account class
                 self.node_message(str(message))
             except socket.timeout:
                 print('Node: Connection timeout!')

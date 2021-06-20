@@ -29,10 +29,15 @@ class Account(Node):
 
     def transferMoney(self, username, amount):
         ip, port = self.get_request(username)
-        self.send_to_node(amount, ip, int(port))
-        self.lock.acquire()
-        self.balance = self.balance - float(amount)
-        self.lock.release()
+        if float(amount) > self.balance:
+            raise Exception("You do not have sufficient funds to make this transfer")
+        elif float(amount) <= 0:
+            raise Exception("You can not transfer a negative or null amount of money")
+        else:
+            self.send_to_node(amount, ip, int(port))
+            self.lock.acquire()
+            self.balance = self.balance - float(amount)
+            self.lock.release()
 
     def node_message(self, data):
         '''
