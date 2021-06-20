@@ -1,3 +1,4 @@
+import java.lang.Exception
 import java.util.concurrent.locks.ReentrantLock
 
 
@@ -56,15 +57,16 @@ class Account(_NodeAddress: NodeAddress, _username: String) : Node(_NodeAddress)
             throw NotEnoughFunds("Exception. Account's funds aren't enough to perform operation")
         }
         //If we have enough funds we initiate the transfer
-        super.sendMessage(_NodeAddress, amount.toString())
+        val res = super.sendMessage(_NodeAddress, amount.toString())
         //If we receive the desired ACK we will subtract money from our end
+        if (res == -1){ throw Exception("error when sending money") }
         try {
             mutex.lock();
             removeAmount(amount);
         }finally {
             mutex.unlock()
         }
-        return 0;
+        return res;
     }
 
     fun transferMoneyToUser(_username: String, amount: Double): Int{

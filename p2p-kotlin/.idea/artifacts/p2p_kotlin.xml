@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="javafx" name="p2p-kotlin">
+    <output-path>$PROJECT_DIR$/out/artifacts/p2p_kotlin</output-path>
+    <root id="root">
+      <element id="archive" name="p2p_kotlin.jar">
+        <element id="module-output" name="p2p-kotlin" />
+      </element>
+    </root>
+  </artifact>
+</component>

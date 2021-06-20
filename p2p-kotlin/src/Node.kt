@@ -29,7 +29,6 @@ open class Node(_NodeAddress : NodeAddress) {
 
     fun listenConnections(): Int{
         startListening()
-
         thread(start = true){
             while(running){
                 debugPrint("Listening for incoming connections...\n")
@@ -46,14 +45,9 @@ open class Node(_NodeAddress : NodeAddress) {
                     if(res.contains(-1)){
                         print("changing state\n")
                         state = -1
-                    }else if(res.contains(-2)){
-                        state = -2;
-                    }
-                }catch (e: SocketTimeoutException){
-                    debugPrint("Socket Timed out, restarting listening process...\n");
-                }catch (e: SocketException){
-                    
-                }
+                    }else if(res.contains(-2)){ state = -2; }
+                }catch (e: SocketTimeoutException){ debugPrint("Socket Timed out, restarting listening process...\n");
+                }catch (e: SocketException){ debugPrint("Shutting down node...\n")}
             }
         }
         return 0
@@ -80,15 +74,12 @@ open class Node(_NodeAddress : NodeAddress) {
 
         }catch (e: NoSuchElementException){
             debugPrint("Error when reading the incoming message! No line was found when reading\n");
-            e.printStackTrace();
             return -1
         }catch (e: NotDoubleAmount){
             debugPrint("Sent amount is not a number!");
-            e.printStackTrace();
-            return -1;
+            throw NotDoubleAmount("Sent amount is not a number!")
         }catch (e: NotParseableToDouble){
-
-            return -1;
+            throw NotParseableToDouble("Sent amount is not a number!")
         }
     }
 
