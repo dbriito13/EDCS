@@ -8,11 +8,10 @@ import kotlin.IllegalArgumentException
 import kotlin.NoSuchElementException
 import kotlin.concurrent.thread
 
-var state = 0;
-
 open class Node(_NodeAddress : NodeAddress) {
     val address: NodeAddress = _NodeAddress
     val sock : ServerSocket
+    var state = 0;
     private var running : Boolean = true;
     private var debug : Boolean = true;
 
@@ -52,6 +51,8 @@ open class Node(_NodeAddress : NodeAddress) {
                     }
                 }catch (e: SocketTimeoutException){
                     debugPrint("Socket Timed out, restarting listening process...\n");
+                }catch (e: SocketException){
+                    
                 }
             }
         }
@@ -133,7 +134,7 @@ open class Node(_NodeAddress : NodeAddress) {
     }
 
     fun stopListening(){
-        debugPrint("Stopping Node from listening to messages...")
+        debugPrint("Stopping Node from listening to messages...\n")
         this.running = false;
     }
 
@@ -142,7 +143,7 @@ open class Node(_NodeAddress : NodeAddress) {
     }
 
     fun shutdown(){
-        debugPrint("Shutting down Node...")
+        debugPrint("Shutting down Node...\n")
         stopListening()
         this.sock.close();
     }
