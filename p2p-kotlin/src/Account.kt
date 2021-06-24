@@ -80,6 +80,7 @@ class Account(_NodeAddress: NodeAddress, _username: String) : Node(_NodeAddress)
         print("The received user has the following info: IP:$_host, and port:$_port\n");
 
         //Now we build the NodeAddress of the destination user with this information
+        //Now we build the NodeAddress of the destination user with this information
         val address = NodeAddress(_host,_port)
         //Finally we call the underlying function that handles the sending of the money to an address
         return transferMoney(address,amount);

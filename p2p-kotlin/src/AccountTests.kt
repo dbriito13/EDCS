@@ -7,8 +7,8 @@ class AccountTests {
     @Test
     fun testCreation(){
         //Tests the correct creation of Account
-        val nodeAddress = NodeAddress("127.0.0.1", 19800);
-        val username = "testUsername"
+        val nodeAddress = NodeAddress("127.0.0.1", 31113);
+        val username = "tt"
         //Creation of Account
         val account = Account(nodeAddress, username);
         //Check the account was correctly created and has a balance of 0.0€
@@ -25,7 +25,7 @@ class AccountTests {
         //Creation of Account
         val account1 = Account(nodeAddress1, username1);
 
-        val nodeAddress2 = NodeAddress("127.0.0.1", 19800);
+        val nodeAddress2 = NodeAddress("127.0.0.1", 19876);
         val username2 = "Lucas"
         //Creation of Account
         val account2 = Account(nodeAddress2, username2);
@@ -36,8 +36,8 @@ class AccountTests {
 
     @Test
     fun testSendNotDoubleAmount(){
-        val nodeAddress1 = NodeAddress("127.0.0.1", 18080);
-        val username1 = "Daniel"
+        val nodeAddress1 = NodeAddress("127.0.0.1", 33333);
+        val username1 = "errorNotDouble"
         //Creation of Account
         val account1 = Account(nodeAddress1, username1);
         assertFailsWith<NotParseableToDouble> {
@@ -59,13 +59,13 @@ class AccountTests {
 
     @Test
     fun testSendMoney(){
-        val nodeAddress1 = NodeAddress("127.0.0.1", 18080);
-        val username1 = "Daniel"
+        val nodeAddress1 = NodeAddress("127.0.0.1", 38080);
+        val username1 = "sender"
         //Creation of Account
         val account1 = Account(nodeAddress1, username1);
 
-        val nodeAddress2 = NodeAddress("127.0.0.1", 19800);
-        val username2 = "Lucas"
+        val nodeAddress2 = NodeAddress("127.0.0.1", 39800);
+        val username2 = "receiver"
         //Creation of Account
         val account2 = Account(nodeAddress2, username2);
 
@@ -77,18 +77,21 @@ class AccountTests {
         thread(start = true) {
             account2.transferMoney(nodeAddress1, 100.0);
         }
-        Thread.sleep(35000);
+        Thread.sleep(5000);
+
+        account1.checkBalance()
+        account2.checkBalance()
     }
 
     @Test
     fun testSendMoneyToUsername(){
-        val nodeAddress1 = NodeAddress("127.0.0.1", 18000);
-        val username1 = "dbrito"
+        val nodeAddress1 = NodeAddress("127.0.0.1", 48000);
+        val username1 = "senderTest"
         //Creation of Account
         val account1 = Account(nodeAddress1, username1);
 
-        val nodeAddress2 = NodeAddress("127.0.0.1", 19800);
-        val username2 = "Lucas"
+        val nodeAddress2 = NodeAddress("127.0.0.1", 49800);
+        val username2 = "receiverTest"
         //Creation of Account
         val account2 = Account(nodeAddress2, username2);
 
@@ -103,7 +106,7 @@ class AccountTests {
 
     @Test
     fun testAccountRegisteredToDiscoveryServer(){
-        val nodeAddress = NodeAddress("127.0.0.1", 19880);
+        val nodeAddress = NodeAddress("127.0.0.1", 23880);
         val username = "testSubject"
         //Creation of Account
         val account = Account(nodeAddress, username);

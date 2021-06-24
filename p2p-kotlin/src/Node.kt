@@ -41,7 +41,8 @@ open class Node(_NodeAddress : NodeAddress) {
                     thread(start = true){
                         val result = readConnection(ClientSocket)
                         res.add(result)
-                    }
+                        print(res)
+                    }.join()
                     if(res.contains(-1)){
                         print("changing state\n")
                         state = -1

@@ -41,6 +41,26 @@ public class Account extends Node{
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
 
+        int status = con.getResponseCode();
+        if(status>299){
+            System.out.println("Changing server!...");
+            URL urlSec = new URL("https://fast-atoll-78029.herokuapp.com/username?username=" + username);
+            HttpURLConnection conSec = (HttpURLConnection) urlSec.openConnection();
+            conSec.setRequestMethod("GET");
+
+            BufferedReader inSec = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String inputLineSec;
+            StringBuffer contentSec = new StringBuffer();
+            while ((inputLineSec = inSec.readLine()) != null) {
+                contentSec.append(inputLineSec);
+            }
+            inSec.close();
+            if(contentSec.toString() == null){
+                throw new Exception("User couldn't be found out");
+            }
+            return contentSec.toString();
+        }
+
         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
         String inputLine;
         StringBuffer content = new StringBuffer();
@@ -60,6 +80,22 @@ public class Account extends Node{
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
 
+        int status = con.getResponseCode();
+        if(status > 299){
+            BufferedReader inSec = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String inputLineSec;
+            StringBuffer contentSec = new StringBuffer();
+            while ((inputLineSec = inSec.readLine()) != null) {
+                contentSec.append(inputLineSec);
+            }
+            inSec.close();
+            if(contentSec.toString().equals("Err")){
+                //User already exists
+                throw new Exception("User already exists");
+            }
+            return contentSec.toString();
+        }
+
         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
         String inputLine;
         StringBuffer content = new StringBuffer();
@@ -67,7 +103,7 @@ public class Account extends Node{
             content.append(inputLine);
         }
         in.close();
-        if(content.toString() == "Err"){
+        if(content.toString().equals("Err")){
             //User already exists
             throw new Exception("User already exists");
         }
@@ -187,10 +223,17 @@ public class Account extends Node{
             e.printStackTrace();
         }
 
+        System.out.println(account1.getAmount());
+        System.out.println(account2.getAmount());
+
         t1.interrupt();
         t2.interrupt();
         account1.stop_node();
         account2.stop_node();
 
+    }
+
+    private Double getAmount() {
+        return this.amount;
     }
 }

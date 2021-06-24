@@ -11,3 +11,5 @@ class NegativeFundsAmount (message: String) : Exception(message)
 class NotParseableToDouble (message: String) : Exception(message);
 
 class UserAlreadyExists (message: String) : Exception(message);
+
+class ServersFailedException(message: String) : Exception(message);
