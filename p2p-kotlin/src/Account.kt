@@ -1,3 +1,4 @@
+import java.io.File
 import java.lang.Exception
 import java.util.concurrent.locks.ReentrantLock
 
@@ -6,14 +7,28 @@ class Account(_NodeAddress: NodeAddress, _username: String) : Node(_NodeAddress)
     val username = _username;
     var mutex = ReentrantLock();
     var balance = 0.0;
+    val filename = "$_username.txt";
+    val file = File(filename);
 
     init {
+
+        val isNewFileCreated :Boolean = file.createNewFile()
+
+        if(isNewFileCreated){
+            debugPrint("$filename is created successfully.")
+            file.writeText("0.0")
+        } else{
+            //If the file already exists then read the money amount from it and set it to the users balance
+            var amount = File(filename).readText(Charsets.UTF_8)
+            //now we have the amount, we set the balance to it
+            this.balance = amount.toDouble();
+        }
         //When we create an account we will have to do a POST request to the /add endpoint.
         val requestHandler : Request = Request();
 
         val response = requestHandler.postRequest(_username,_NodeAddress.host,_NodeAddress.port);
         if(response == "OK"){
-            debugPrint("User added correctly to our system!\n");
+            //debugPrint("User added correctly to our system!\n");
         }else{
             throw UserAlreadyExists("The user is already registered in our database, choose a different username!")
         }
@@ -21,15 +36,18 @@ class Account(_NodeAddress: NodeAddress, _username: String) : Node(_NodeAddress)
 
     fun insertAmount(amount : Double){
         this.balance += amount;
+        file.writeText("${this.balance}")
     }
 
     private fun removeAmount(amount: Double){
         this.balance -= amount;
+        file.writeText("${this.balance}")
     }
 
     override fun receiveFunds(amount: String): Int {
         //First we will deal with the incoming String and try to convert it to a Double
         print("Receiving funds...\n")
+        Thread.sleep(1000)
         val amountDeposit = amount.toDoubleOrNull()
         if(amountDeposit == null){
             super.debugPrint("The sent message contains some error and can't be parsed to a Double value\n");
@@ -77,8 +95,6 @@ class Account(_NodeAddress: NodeAddress, _username: String) : Node(_NodeAddress)
         val array: List<String> = response.split(':');
         val _host = array[0];
         val _port = array[1].toInt();
-        print("The received user has the following info: IP:$_host, and port:$_port\n");
-
         //Now we build the NodeAddress of the destination user with this information
         //Now we build the NodeAddress of the destination user with this information
         val address = NodeAddress(_host,_port)

@@ -1,12 +1,11 @@
 //import com.sun.xml.internal.ws.api.message.ExceptionHasMessage;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -14,12 +13,25 @@ public class Account extends Node{
     private Double amount;
     private String name;
     private ReentrantLock mutex;
+    private String filename;
 
     public Account(String host, int port, String name) throws Exception {
         super(host, port);
         //We will set the starting amount as 0
         this.amount = 0.0;
         this.name = name;
+        this.filename = name+".txt";
+        File file = new File(this.filename);
+        Boolean iscreated = file.createNewFile();
+        if(iscreated){
+            FileWriter myWriter = new FileWriter(this.filename);
+            myWriter.write("0.0");
+            myWriter.close();
+        }else {
+            //We extract the amount from the txt file and set it to the balance
+            Scanner myReader = new Scanner(file);
+            this.amount = Double.valueOf(myReader.nextLine());
+        }
         this.mutex = new ReentrantLock();
         String response = this.post_request(name, host, Integer.toString(port));
         System.out.println(response);
@@ -125,7 +137,12 @@ public class Account extends Node{
         try{
             this.mutex.lock();
             this.amount = this.amount - amount;
-        }finally {
+            FileWriter myWriter = new FileWriter(this.filename);
+            myWriter.write(this.amount.toString());
+            myWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
             this.mutex.unlock();
         }
         this.send_message(message, account_ip, account_port);
@@ -146,6 +163,11 @@ public class Account extends Node{
             this.mutex.lock();
             //Here the update of the balance occurs
             this.amount += amount_d;
+            FileWriter myWriter = new FileWriter(this.filename);
+            myWriter.write(this.amount.toString());
+            myWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         } finally {
             this.mutex.unlock();
         }
@@ -161,7 +183,12 @@ public class Account extends Node{
         try{
             this.mutex.lock();
             this.amount = this.amount - amount;
-        }finally {
+            FileWriter myWriter = new FileWriter(this.filename);
+            myWriter.write(this.amount.toString());
+            myWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
             this.mutex.unlock();
         }
     }
@@ -195,6 +222,8 @@ public class Account extends Node{
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+
         Account account2 = null;
         try {
             account2 = new Account("127.0.0.1", 18082, "usuarioprueba2");
@@ -230,6 +259,7 @@ public class Account extends Node{
         t2.interrupt();
         account1.stop_node();
         account2.stop_node();
+
 
     }
 

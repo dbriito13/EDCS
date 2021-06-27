@@ -1,11 +1,23 @@
 from node import Node
 import requests
+import os.path
 
 class Account(Node):
 
     def __init__(self, host, port, name):
         super(Account, self).__init__(host, port)
-        self.balance = 0.0
+        self.filename = name+".txt"
+        if os.path.isfile(self.filename):
+            #If the file already exists then we read the file to find the amount
+            f = open(self.filename, "r")
+            self.balance = float(f.read())
+        else:
+            #If the file doesn't exist we create it and write the initial balance of 0.0
+            self.balance = 0.0
+            f = open(self.filename, "w")
+            f.write("0.0")
+        print("Hola")
+        f.close()
         self.name = name
         self.post_request(name, host, port)
 
@@ -50,6 +62,9 @@ class Account(Node):
             self.send_to_node(amount, ip, int(port))
             self.lock.acquire()
             self.balance = self.balance - float(amount)
+            f = open(self.filename, "w")
+            f.write(self.balance)
+            f.close()
             self.lock.release()
 
     def node_message(self, data):
@@ -62,6 +77,9 @@ class Account(Node):
         self.lock.acquire()
         print("Lock acquired!")
         self.balance += amount
+        f = open(self.filename, "w")
+        f.write(self.balance)
+        f.close()
         self.lock.release()
         print("Lock released!")
         print("Your resulting balance after the operation is: " + str(self.balance))

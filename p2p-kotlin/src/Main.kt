@@ -5,6 +5,7 @@ import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.net.BindException
 import javax.swing.*
+import kotlin.concurrent.thread
 
 
 class Main (_title: String) : JFrame(){
@@ -71,6 +72,7 @@ class Main (_title: String) : JFrame(){
         val transferButton = JButton("Send Money")
         val depositButton = JButton("Deposit Money")
         val refreshButton = JButton("Refresh")
+        val blockButton = JButton("Block (10 seconds)")
 
         depositButton.addActionListener(ActionListener {
             try {
@@ -97,6 +99,18 @@ class Main (_title: String) : JFrame(){
             }
         }
 
+        blockButton.addActionListener{
+            thread(start = true) {
+                try {
+                    account?.mutex?.lock();
+                    print("The lock is blocked for 10 seconds")
+                    Thread.sleep(10000)
+                } finally {
+                    account?.mutex?.unlock();
+                    print("Lock unlocked incoming transfers can still go through")
+                }
+            }
+        }
 
 
         titleLabel.setBounds(50,10,250,30)
@@ -109,7 +123,8 @@ class Main (_title: String) : JFrame(){
         transferButton.setBounds(50, 360, 270, 30)
         depositLabel.setBounds(50,430,100,30)
         depositField.setBounds(150, 430, 100, 30)
-        depositButton.setBounds(50, 500, 270, 30)
+        depositButton.setBounds(50, 570, 270, 30)
+        blockButton.setBounds(50,500,270,30)
 
         panel.add(userLabel)
         panel.add(titleLabel)
@@ -122,6 +137,7 @@ class Main (_title: String) : JFrame(){
         panel.add(depositButton)
         panel.add(balance)
         panel.add(refreshButton)
+        panel.add(blockButton)
         return panel;
     }
 
@@ -161,7 +177,7 @@ fun main(){
     val frame = Main("title")
     frame.isVisible = true
     frame.title = "Login Form"
-    frame.setBounds(10, 10, 370, 600)
+    frame.setBounds(10, 10, 370, 700)
     frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
     frame.isResizable = false
 }

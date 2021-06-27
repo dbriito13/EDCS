@@ -32,6 +32,8 @@ def loginButtonPressed():
 
 def depositButtonPressed():
     current_Account.balance += float(entry1_d.get())
+    f = open(current_Account.filename, "w")
+    f.write(str(current_Account.balance))
     messagebox.Message("Deposit made!")
     subtitle_2.config(text = current_Account.name + ", balance: " + str(current_Account.balance))
 

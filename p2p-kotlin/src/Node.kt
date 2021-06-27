@@ -23,7 +23,7 @@ open class Node(_NodeAddress : NodeAddress) {
         //Bind the socket to the specified listening socket address (host + port)
         sock.bind(endPointAddress)
         //Set the socket timeout
-        sock.soTimeout = 10000
+        sock.soTimeout = 100000
         debugPrint("Node Created correctly! At IP: ${_NodeAddress.host} and port: ${_NodeAddress.port}\n");
     }
 
@@ -31,7 +31,7 @@ open class Node(_NodeAddress : NodeAddress) {
         startListening()
         thread(start = true){
             while(running){
-                debugPrint("Listening for incoming connections...\n")
+                //debugPrint("Listening for incoming connections...\n")
                 //While our p2p node is running we will accept incoming connections, with each one going into a different thread
                 try {
                     val ClientSocket = sock.accept();
@@ -41,12 +41,7 @@ open class Node(_NodeAddress : NodeAddress) {
                     thread(start = true){
                         val result = readConnection(ClientSocket)
                         res.add(result)
-                        print(res)
-                    }.join()
-                    if(res.contains(-1)){
-                        print("changing state\n")
-                        state = -1
-                    }else if(res.contains(-2)){ state = -2; }
+                    }
                 }catch (e: SocketTimeoutException){ debugPrint("Socket Timed out, restarting listening process...\n");
                 }catch (e: SocketException){ debugPrint("Shutting down node...\n")}
             }
@@ -84,9 +79,8 @@ open class Node(_NodeAddress : NodeAddress) {
         }
     }
 
-    open fun
-            receiveFunds(amount : String): Int{
-        debugPrint("Function to be overriden by child class");
+    open fun receiveFunds(amount : String): Int{
+        debugPrint("Function to be overridden by child class");
         return -1;
     }
 
@@ -105,7 +99,7 @@ open class Node(_NodeAddress : NodeAddress) {
         }
         try {
             val outGoingSocket = Socket()
-            val endPointAddress = InetSocketAddress(InetAddress.getByName(_NodeAddress.host), _NodeAddress.port)
+            val endPointAddress = InetSocketAddress(InetAddress.getByName(_NodeAddress.host), _NodeAddress.port);
             outGoingSocket.connect(endPointAddress);
             //Sending the message
             val output = PrintWriter(outGoingSocket.getOutputStream(), true)

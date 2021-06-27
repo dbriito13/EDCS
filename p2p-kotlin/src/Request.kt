@@ -18,14 +18,11 @@ open class Request {
             val urlSecondary = URL(urlAuxSecondary);
             val conSecondary: HttpURLConnection = urlSecondary.openConnection() as HttpURLConnection
             conSecondary.requestMethod = "GET"
-
             status = conSecondary.responseCode;
-
             if(status > 299){
                 print("DEBUG: Both servers failed...")
                 throw ServersFailedException("Both servers failed");
             }
-
             val inputSec = BufferedReader(InputStreamReader(conSecondary.inputStream))
             var inputLine: String?
             val contentSec = StringBuffer()
@@ -48,7 +45,7 @@ open class Request {
 
     fun postRequest(_username: String, _ip: String, _port: Int): String {
         var urlAux = "https://evening-headland-54924.herokuapp.com/add?username=$_username&ip=${_ip}&port=${_port}"
-        val url = URL(urlAux+params)
+        val url = URL(urlAux)
         val con: HttpURLConnection = url.openConnection() as HttpURLConnection
         con.requestMethod = "POST"
 

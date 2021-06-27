@@ -119,4 +119,21 @@ class AccountTests {
         assert(ipReq == nodeAddress.host);
         assert(portReq.toInt() == nodeAddress.port)
     }
+
+    @Test
+    fun testParallelism(){
+        val destUsername = "danibrito13"
+        for(i in (0..50)) {
+            thread(start = true) {
+                var nodeAddress = NodeAddress("127.0.0.1", 23880 + i);
+                var username = "testSubject$i"
+                //Creation of Account
+                var account = Account(nodeAddress, username);
+                Thread.sleep(100)
+                account.insertAmount(10.0)
+                account.transferMoneyToUser(destUsername, 1.0)
+            }
+        }
+        Thread.sleep(10000);
+    }
 }
