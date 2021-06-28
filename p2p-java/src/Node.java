@@ -54,13 +54,14 @@ public class Node implements Runnable {
                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 //Now we receive the UTF-8 String sent by the client
                 String str = (String)in.readLine();
-                System.out.println("message= " + str);
                 this.addAmount(str);
 
             }catch (java.net.SocketTimeoutException e){
                 System.out.println("Socket timed out, restarting listening process...");
             }
             catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 

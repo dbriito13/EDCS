@@ -216,49 +216,68 @@ public class Account extends Node{
     }
 
     public static void main(String[] args) {
-        Account account1 = null;
+        Account accountDest = null;
         try {
-            account1 = new Account("127.0.0.1", 19011, "usuarioprueba1");
+            accountDest = new Account("127.0.0.1", 19011, "destinationUser");
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+
+        Account account1 = null;
+        try {
+            account1 = new Account("127.0.0.1", 18082, "usuarioprueba1");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         Account account2 = null;
         try {
-            account2 = new Account("127.0.0.1", 18082, "usuarioprueba2");
+            account2 = new Account("127.0.0.1", 18083, "usuarioprueba2");
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        Thread t1 = new Thread(account1);
+        Thread t1 = new Thread(accountDest);
         t1.start();
 
+        final Account finalAccount1 = account1;
+        Thread tsend1 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                assert finalAccount1 != null;
+                try {
+                    finalAccount1.moneyTransfer("destinationUser", 10.0);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
 
-        Thread t2 = new Thread(account2);
-        t2.start();
+        final Account finalAccount2 = account2;
+        Thread tsend2 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                assert finalAccount2 != null;
+                try {
+                    finalAccount2.moneyTransfer("destinationUser", 10.0);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
 
-        account1.depositAmount(200.0);
+        tsend1.start();
+        tsend2.start();
 
-        //Sending of the messages between the accounts1
         try {
-            account1.moneyTransfer("usuarioprueba2", 100.0);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
-            TimeUnit.SECONDS.sleep(35);
+            TimeUnit.SECONDS.sleep(5);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        System.out.println(account1.getAmount());
-        System.out.println(account2.getAmount());
-
         t1.interrupt();
-        t2.interrupt();
-        account1.stop_node();
-        account2.stop_node();
+        accountDest.stop_node();
 
 
     }
